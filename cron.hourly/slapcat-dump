@@ -1,0 +1,4 @@
+#!/bin/sh -e
+
+cd /home/dpavlin/ldap
+./slapcat-list-users.pl >/dev/null
