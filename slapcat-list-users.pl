@@ -34,7 +34,7 @@ while(<$ldap>) {
 		my ($a,$need_decode,$v) = ( $1,$2, $3 );
 
 		if ( $a eq 'uid' && $user ) {
-			my $line = join(" ", map { $user->{$_} } @cols) . "\n";
+			my $line = join(" ", map { defined $user->{$_} ? $user->{$_} : '?' } @cols) . "\n";
 			print $line;
 			print $out $line;
 			$user = undef;
