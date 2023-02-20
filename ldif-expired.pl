@@ -21,7 +21,7 @@ my $regex = join('|', @cols);
 
 my $user;
 
-my $today = strftime("%Y%m%d", localtime);
+my $today = $ENV{TODAY} || strftime("%Y%m%d", localtime);
 warn "# today $today";
 
 sub check_user {
@@ -42,7 +42,12 @@ sub check_user {
 
 my $count;
 
-open(my $ldap, '<', 'out/ldif');
+my $ldif = $ENV{LDIF} || "out/ldif";
+# git clone -b before-delete out out.before-delete
+#my $ldif = "out.before-delete/ldif";
+warn "# ldif $ldif";
+
+open(my $ldap, '<', $ldif);
 while(<$ldap>) {
 	chomp;
 
