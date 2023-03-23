@@ -7,6 +7,7 @@ use MIME::Base64;
 my @cols = qw(
 uid
 hrEduPersonUniqueID
+mail
 hrEduPersonExpireDate
 createTimestamp
 modifyTimestamp
@@ -46,7 +47,11 @@ while(<$ldap>) {
 			# nop
 		}
 
-		$user->{$a} = $v;
+		if ( defined $user->{$a} ) {
+			$user->{$a} .= ',' . $v;
+		} else {
+			$user->{$a} = $v;
+		}
 	}
 }
 
