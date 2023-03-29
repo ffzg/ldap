@@ -7,10 +7,10 @@ use MIME::Base64;
 my @cols = qw(
 uid
 hrEduPersonUniqueID
+hrEduPersonOIB
 mail
 hrEduPersonExpireDate
 createTimestamp
-modifyTimestamp
 hrEduPersonAffiliation
 displayName
 );
