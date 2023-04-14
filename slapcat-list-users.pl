@@ -27,6 +27,12 @@ my $user;
 open(my $out, '>', 'out/ldap.users');
 open(my $ldif, '>', 'out/ldif');
 
+sub dump_user {
+	my $line = join(" ", map { defined $user->{$_} ? $user->{$_} : '?' } @cols) . "\n";
+	print $line;
+	print $out $line;
+}
+
 open(my $ldap, '-|', 'sudo -u openldap slapcat');
 while(<$ldap>) {
 	print $ldif $_;
@@ -35,9 +41,7 @@ while(<$ldap>) {
 		my ($a,$need_decode,$v) = ( $1,$2, $3 );
 
 		if ( $a eq 'uid' && $user ) {
-			my $line = join(" ", map { defined $user->{$_} ? $user->{$_} : '?' } @cols) . "\n";
-			print $line;
-			print $out $line;
+			dump_user;
 			$user = undef;
 		}
 
@@ -54,5 +58,6 @@ while(<$ldap>) {
 		}
 	}
 }
+dump_user;
 
 system 'git -C out diff | grep + >/dev/null && git -C out commit -m $( date +%Y-%m-%d ) -a';
