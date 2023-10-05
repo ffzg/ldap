@@ -3,14 +3,13 @@ use warnings;
 use strict;
 use autodie;
 use MIME::Base64;
+use Encode;
 use POSIX qw(strftime mktime);
 use Data::Dump qw(dump);
 
 # check if students have jmbag
 
 my $debug = $ENV{DEBUG} || 0;
-
-my @email_template = <DATA>;
 
 sub yyyymmdd_to_t {
 	my $yyyymmdd = shift;
@@ -30,6 +29,7 @@ hrEduPersonExpireDate
 createTimestamp
 hrEduPersonAffiliation
 displayName
+ou
 );
 
 my $regex = join('|', @cols);
@@ -41,8 +41,13 @@ warn "# today $today";
 
 my $today_t = yyyymmdd_to_t( $today );
 
+my $stat;
+
 sub check_user {
 	warn "### user = ",dump($user) if $debug;
+
+	$stat->{ou}->{ $user->{ou} }++;
+
 	if (
 		! defined($user->{uid}) ||
 		$user->{hrEduPersonExpireDate} eq 'NONE'
@@ -93,7 +98,8 @@ while(<$ldap>) {
 	if ( $_ eq '' && $user ) {
 		if ( check_user ) {
 			$count++;
-			#exit 0 if $count == 10;
+			last if ( $debug && $count == 10 );
+
 		}
 		$user = undef;
 	}
@@ -101,7 +107,11 @@ while(<$ldap>) {
 	if ( m/($regex):(:?)\s(.+)/ ) {
 		my ($a,$need_decode,$v) = ( $1,$2, $3 );
 
-		$v = decode_base64($v) if $need_decode;
+		if ( $need_decode ) {
+			$v = decode_base64($v);
+			Encode::_utf8_on($v);
+		}
+
 
 		if ( $a eq 'hrEduPersonUniqueNumber' ) {
 			my ($name,$num) = split(/:\s*/, $v, 2);
@@ -120,4 +130,6 @@ while(<$ldap>) {
 }
 
 check_user;
+
+print "# stat = ",dump($stat),$/;
 
